@@ -3,28 +3,38 @@ package art.aelaort;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
-import static art.aelaort.Utils.log;
+import static java.lang.System.getProperty;
+import static java.nio.file.Path.of;
 
 @Component
 public class Console implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
-		String path = getPath(args);
-		log("path: %s", path);
+		Path path = getPath(args);
+		try (Stream<Path> walk = Files.walk(path)) {
+			walk
+					.map(Path::toString)
+					.map(s -> s.replace(path.getParent().toString(), ""))
+					.map(s -> s.replaceAll("^\\\\", ""))
+					.forEach(Utils::log);
+		}
+
 	}
 
-	private String getPath(String[] args) {
+	private Path getPath(String[] args) {
 		if (args.length > 0) {
-			String arg = args[0];
-			if (Path.of(arg).isAbsolute()) {
+			Path arg = of(args[0].trim());
+			if (arg.isAbsolute()) {
 				return arg;
 			} else {
-				return Path.of(System.getProperty("user.dir")).resolve(arg).toString();
+				return of(getProperty("user.dir")).resolve(arg);
 			}
 		} else {
-			return System.getProperty("user.dir");
+			return of(getProperty("user.dir"));
 		}
 	}
 }

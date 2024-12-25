@@ -4,9 +4,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
+import static art.aelaort.Utils.log;
 import static java.lang.System.getProperty;
 import static java.nio.file.Path.of;
 
@@ -21,6 +23,8 @@ public class Console implements CommandLineRunner {
 					.map(s -> s.replace(path.getParent().toString(), ""))
 					.map(s -> s.replaceAll("^\\\\", ""))
 					.forEach(Utils::log);
+		} catch (NoSuchFileException e) {
+			log("not found path %s\n", path);
 		}
 
 	}
